@@ -16,6 +16,7 @@ type Service interface {
 	PlaceOrder(ctx context.Context, distance int) (*Order, error)
 	ListOrder(ctx context.Context) ([]Order, error)
 	GetDistance(ctx context.Context, req PlaceOrderRequest) (int, error)
+	TakeOrder(ctx context.Context, id string) (bool, error)
 }
 
 type service struct {
@@ -105,4 +106,18 @@ func (s *service) ListOrder(ctx context.Context) ([]Order, error) {
 	}
 
 	return orderList, nil
+}
+
+func (s *service) TakeOrder(ctx context.Context, id string) (bool, error) {
+	result, err := s.repository.Exec("Update delivery_order set status=? where id=? and status=?", "TAKEN", id, "UNASSIGNED")
+	if err != nil {
+		return false, err
+	}
+
+	count, err := result.RowsAffected()
+	if count != 1 || err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

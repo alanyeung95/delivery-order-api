@@ -14,12 +14,9 @@ import (
 func NewHandler(svc Service) http.Handler {
 	h := handlers{svc}
 	r := chi.NewRouter()
-	//r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-	//	w.Write([]byte("hello world"))
-	//})
 	r.Post("/", h.handlePlaceOrder)
 	r.Get("/", h.handleListOrders)
-
+	r.Patch("/{id}", h.handleTakeOrder)
 	return r
 }
 
@@ -55,4 +52,17 @@ func (h *handlers) handleListOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	kithttp.EncodeJSONResponse(ctx, w, orderList)
+}
+
+func (h *handlers) handleTakeOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+
+	success, err := h.svc.TakeOrder(ctx, id)
+	if err != nil {
+		kithttp.DefaultErrorEncoder(ctx, err, w)
+		return
+	}
+	kithttp.EncodeJSONResponse(ctx, w, success)
+
 }

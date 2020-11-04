@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
+	er "errors"
 	"net/http"
 	"os"
 
@@ -16,7 +16,8 @@ type Service interface {
 	PlaceOrder(ctx context.Context, distance int) (*Order, error)
 	ListOrder(ctx context.Context) ([]Order, error)
 	GetDistance(ctx context.Context, req PlaceOrderRequest) (int, error)
-	TakeOrder(ctx context.Context, id string) (bool, error)
+	TakeOrder(ctx context.Context, id string) error
+	GetOrderById(ctx context.Context, id string) (*Order, error)
 }
 
 type service struct {
@@ -31,7 +32,7 @@ func NewService(repository *sql.DB) Service {
 func (s *service) PlaceOrder(ctx context.Context, distance int) (*Order, error) {
 	id := uuid.NewV4().String()
 
-	_, err := s.repository.Exec("INSERT INTO delivery_order(id,distance,status) values(?,?,?)", id, distance, Unassigned)
+	_, err := s.repository.Exec("INSERT INTO delivery_order(id,distance,status) values(?,?,?)", id, distance, OrderStatusUnassigned)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +41,6 @@ func (s *service) PlaceOrder(ctx context.Context, distance int) (*Order, error) 
 	// TODO: db naming
 	err = s.repository.QueryRow("SELECT id, distance, status FROM delivery_order where id = ?", id).Scan(&order.ID, &order.Distance, &order.Status)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -80,7 +80,12 @@ func (s *service) GetDistance(ctx context.Context, req PlaceOrderRequest) (int, 
 		return -1, nil // TODO
 	}
 
-	return res.Rows[0].Elements[0].Distance.Value, nil
+	distance := res.Rows[0].Elements[0].Distance.Value
+	if distance == nil || *distance < 0 {
+		return -1, er.New("google api cannot return distance value")
+	}
+
+	return *distance, nil
 }
 
 func (s *service) ListOrder(ctx context.Context) ([]Order, error) {
@@ -108,16 +113,27 @@ func (s *service) ListOrder(ctx context.Context) ([]Order, error) {
 	return orderList, nil
 }
 
-func (s *service) TakeOrder(ctx context.Context, id string) (bool, error) {
+func (s *service) TakeOrder(ctx context.Context, id string) error {
 	result, err := s.repository.Exec("Update delivery_order set status=? where id=? and status=?", "TAKEN", id, "UNASSIGNED")
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	count, err := result.RowsAffected()
 	if count != 1 || err != nil {
-		return false, err
+		return err
 	}
 
-	return true, nil
+	return nil
+}
+
+func (s *service) GetOrderById(ctx context.Context, id string) (*Order, error) {
+	var order Order
+	// TODO: db naming
+	err := s.repository.QueryRow("SELECT id, distance, status FROM delivery_order where id = ?", id).Scan(&order.ID, &order.Distance, &order.Status)
+	if err != nil {
+		return nil, err
+	}
+
+	return &order, nil
 }

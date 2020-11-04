@@ -3,10 +3,19 @@ package orders
 type orderStatus string
 
 const (
-	Unassigned orderStatus = "UNASSIGNED"
-	Taken      orderStatus = "TAKEN"
-	Success    orderStatus = "SUCCESS"
+	OrderStatusUnassigned orderStatus = "UNASSIGNED"
+	OrderStatusTaken      orderStatus = "TAKEN"
+	OrderStatusSuccess    orderStatus = "SUCCESS"
 )
+
+func (e orderStatus) String() string {
+	switch e {
+	case OrderStatusTaken:
+		return "TAKEN"
+	default:
+		return ""
+	}
+}
 
 type responseStatus string
 
@@ -32,6 +41,10 @@ type Row struct {
 
 type Element struct {
 	Distance struct {
-		Value int `json:"value"`
+		Value *int `json:"value"`
 	} `json:"distance"`
+}
+
+type TakeOrderResponse struct {
+	Status orderStatus `json:"status"`
 }

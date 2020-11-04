@@ -1,11 +1,12 @@
 package orders
 
 import (
+	"database/sql"
 	"encoding/json"
-	"fmt"
+	er "errors"
 	"net/http"
 
-	"github.com/alanyeung95/GoProjectDemo/pkg/errors"
+	"github.com/alanyeung95/delivery-order-api/pkg/errors"
 	"github.com/go-chi/chi"
 	kithttp "github.com/go-kit/kit/transport/http"
 )
@@ -29,16 +30,26 @@ func (h *handlers) handlePlaceOrder(w http.ResponseWriter, r *http.Request) {
 	var req PlaceOrderRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		kithttp.DefaultErrorEncoder(ctx, errors.NewBadRequest(err), w)
+		kithttp.DefaultErrorEncoder(ctx, errors.NewBadRequestError(err), w)
+		return
+	}
+
+	if req.Origin[0] == "" || req.Origin[1] == "" || req.Destination[0] == "" || req.Destination[1] == "" {
+		kithttp.DefaultErrorEncoder(ctx, errors.NewBadRequestError(er.New("origin or destination cannot be empty")), w)
+		return
 	}
 
 	distance, err := h.svc.GetDistance(ctx, req)
 	if err != nil {
-		kithttp.DefaultErrorEncoder(ctx, errors.NewBadRequest(err), w)
+		kithttp.DefaultErrorEncoder(ctx, errors.NewServerError(er.New(err.Error())), w)
+		return
 	}
 
-	fmt.Println(distance)
 	newOrder, err := h.svc.PlaceOrder(ctx, distance)
+	if err != nil {
+		kithttp.DefaultErrorEncoder(ctx, errors.NewServerError(er.New(err.Error())), w)
+		return
+	}
 
 	kithttp.EncodeJSONResponse(ctx, w, newOrder)
 }
@@ -58,11 +69,25 @@ func (h *handlers) handleTakeOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
 
-	success, err := h.svc.TakeOrder(ctx, id)
+	targetOrder, err := h.svc.GetOrderById(ctx, id)
 	if err != nil {
-		kithttp.DefaultErrorEncoder(ctx, err, w)
+		if err == sql.ErrNoRows {
+			kithttp.DefaultErrorEncoder(ctx, errors.NewResourceNotFoundError(er.New("Cannot find order: "+id)), w)
+		} else {
+			kithttp.DefaultErrorEncoder(ctx, errors.NewServerError(er.New(err.Error())), w)
+		}
 		return
 	}
-	kithttp.EncodeJSONResponse(ctx, w, success)
 
+	if targetOrder.Status == OrderStatusTaken {
+		kithttp.EncodeJSONResponse(ctx, w, TakeOrderResponse{Status: OrderStatusTaken})
+		return
+	}
+
+	err = h.svc.TakeOrder(ctx, id)
+	if err != nil {
+		kithttp.EncodeJSONResponse(ctx, w, TakeOrderResponse{Status: OrderStatusTaken})
+		return
+	}
+	kithttp.EncodeJSONResponse(ctx, w, TakeOrderResponse{Status: OrderStatusSuccess})
 }

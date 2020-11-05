@@ -2,7 +2,7 @@
 
 ## Todo list
 ### Must
-- [ ] list order pagination 
+- [x] list order pagination 
 - [ ] unit test
 - [ ] swagger.yaml
 - [ ] dockerize service

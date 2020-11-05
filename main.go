@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/alanyeung95/delivery-order-api/pkg/mysql"
 	"github.com/alanyeung95/delivery-order-api/pkg/orders"
+
 	"github.com/go-chi/chi"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -19,8 +21,11 @@ func main() {
 	db.SetConnMaxLifetime(time.Minute * 3)
 	//db.SetMaxOpenConns(10)
 	//db.SetMaxIdleConns(10)
-
-	orderSrv := orders.NewService(db)
+	orderRepository, err := mysql.NewOrderRepository(db)
+	if err != nil {
+		panic(err)
+	}
+	orderSrv := orders.NewService(orderRepository)
 
 	r := chi.NewRouter()
 
@@ -36,9 +41,4 @@ func main() {
 	fmt.Println("Service is running on " + addr)
 	http.ListenAndServe(addr, r)
 
-}
-
-func newOrderSrv(client *sql.DB) (orders.Service, error) {
-	srv := orders.NewService(client)
-	return srv, nil
 }

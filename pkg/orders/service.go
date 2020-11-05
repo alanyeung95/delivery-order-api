@@ -2,7 +2,6 @@ package orders
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	er "errors"
 	"net/http"
@@ -21,30 +20,30 @@ type Service interface {
 }
 
 type service struct {
-	repository *sql.DB
+	repository Repository
 }
 
 // NewService start the new service
-func NewService(repository *sql.DB) Service {
+func NewService(repository Repository) Service {
 	return &service{repository}
 }
 
 func (s *service) PlaceOrder(ctx context.Context, distance int) (*Order, error) {
 	id := uuid.NewV4().String()
 
-	_, err := s.repository.Exec("INSERT INTO delivery_order(id,distance,status) values(?,?,?)", id, distance, OrderStatusUnassigned)
+	err := s.repository.Create(ctx, id, distance, OrderStatusUnassigned.String())
 	if err != nil {
 		return nil, err
 	}
 
-	var order Order
 	// TODO: db naming
-	err = s.repository.QueryRow("SELECT id, distance, status FROM delivery_order where id = ?", id).Scan(&order.ID, &order.Distance, &order.Status)
+	order, err := s.repository.FindByID(ctx, id)
+	//err = s.repository.QueryRow("SELECT id, distance, status FROM delivery_order where id = ?", id).Scan(&order.ID, &order.Distance, &order.Status)
 	if err != nil {
 		return nil, err
 	}
 
-	return &order, nil
+	return order, nil
 }
 
 func (s *service) GetDistance(ctx context.Context, req PlaceOrderRequest) (int, error) {
@@ -89,51 +88,17 @@ func (s *service) GetDistance(ctx context.Context, req PlaceOrderRequest) (int, 
 }
 
 func (s *service) ListOrder(ctx context.Context, limit int, offset int) ([]Order, error) {
-	// Execute the query
-	results, err := s.repository.Query("SELECT * FROM delivery_order LIMIT ? OFFSET ?", limit, offset)
+	orders, err := s.repository.Find(ctx, limit, offset)
 	if err != nil {
 		return nil, err
 	}
-	var orderList []Order
-
-	for results.Next() {
-		var order Order
-		// for each row, scan the result into our tag composite object
-		err = results.Scan(&order.ID, &order.Distance, &order.Status)
-		if err != nil {
-			return nil, err
-		}
-		orderList = append(orderList, order)
-	}
-
-	if orderList == nil {
-		return []Order{}, nil
-	}
-
-	return orderList, nil
+	return orders, nil
 }
 
 func (s *service) TakeOrder(ctx context.Context, id string) error {
-	result, err := s.repository.Exec("Update delivery_order set status=? where id=? and status=?", "TAKEN", id, "UNASSIGNED")
-	if err != nil {
-		return err
-	}
-
-	count, err := result.RowsAffected()
-	if count != 1 || err != nil {
-		return err
-	}
-
-	return nil
+	return s.repository.Update(ctx, id)
 }
 
 func (s *service) GetOrderById(ctx context.Context, id string) (*Order, error) {
-	var order Order
-	// TODO: db naming
-	err := s.repository.QueryRow("SELECT id, distance, status FROM delivery_order where id = ?", id).Scan(&order.ID, &order.Distance, &order.Status)
-	if err != nil {
-		return nil, err
-	}
-
-	return &order, nil
+	return s.repository.FindByID(ctx, id)
 }

@@ -10,8 +10,12 @@ const (
 
 func (e orderStatus) String() string {
 	switch e {
+	case OrderStatusUnassigned:
+		return "UNASSIGNED"
 	case OrderStatusTaken:
 		return "TAKEN"
+	case OrderStatusSuccess:
+		return "SUCCESS"
 	default:
 		return ""
 	}

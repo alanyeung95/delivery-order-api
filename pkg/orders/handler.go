@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	er "errors"
 	"net/http"
+	"strconv"
 
 	"github.com/alanyeung95/delivery-order-api/pkg/errors"
 	"github.com/go-chi/chi"
@@ -56,8 +57,27 @@ func (h *handlers) handlePlaceOrder(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) handleListOrders(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	reqestMap := r.URL.Query()
 
-	orderList, err := h.svc.ListOrder(ctx)
+	page, err := strconv.Atoi(reqestMap.Get("page"))
+	if err != nil {
+		kithttp.DefaultErrorEncoder(ctx, errors.NewBadRequestError(err), w)
+		return
+	} else if page <= 0 {
+		kithttp.DefaultErrorEncoder(ctx, errors.NewBadRequestError(er.New("page number must starts with 1")), w)
+		return
+	}
+
+	limit, err := strconv.Atoi(reqestMap.Get("limit"))
+	if err != nil {
+		kithttp.DefaultErrorEncoder(ctx, errors.NewBadRequestError(err), w)
+		return
+	} else if limit <= 0 {
+		kithttp.DefaultErrorEncoder(ctx, errors.NewBadRequestError(er.New("limte must larger than 0")), w)
+		return
+	}
+
+	orderList, err := h.svc.ListOrder(ctx, limit, limit*(page-1))
 	if err != nil {
 		kithttp.DefaultErrorEncoder(ctx, err, w)
 		return

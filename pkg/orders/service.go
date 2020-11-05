@@ -14,7 +14,7 @@ import (
 // Service interface
 type Service interface {
 	PlaceOrder(ctx context.Context, distance int) (*Order, error)
-	ListOrder(ctx context.Context) ([]Order, error)
+	ListOrder(ctx context.Context, limit int, offset int) ([]Order, error)
 	GetDistance(ctx context.Context, req PlaceOrderRequest) (int, error)
 	TakeOrder(ctx context.Context, id string) error
 	GetOrderById(ctx context.Context, id string) (*Order, error)
@@ -88,9 +88,9 @@ func (s *service) GetDistance(ctx context.Context, req PlaceOrderRequest) (int, 
 	return *distance, nil
 }
 
-func (s *service) ListOrder(ctx context.Context) ([]Order, error) {
+func (s *service) ListOrder(ctx context.Context, limit int, offset int) ([]Order, error) {
 	// Execute the query
-	results, err := s.repository.Query("SELECT * FROM delivery_order")
+	results, err := s.repository.Query("SELECT * FROM delivery_order LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		return nil, err
 	}

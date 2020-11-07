@@ -1,15 +1,28 @@
 # delivery-order-api
 
+## Running test cases
+
+### Unit test
+```
+go test -v ./...
+```
+
+### Integration test
+
+```
+go test --tags=integrationa -v ./...
+```
+
 ## Todo list
 ### Must
 - [x] list order pagination 
-- [ ] unit test
+- [x] unit test
 - [ ] swagger.yaml
 - [ ] dockerize service
-- [ ] integration test
+- [x] integration test
 - [ ] readme instruction
 
 ### Nice to have
 - [ ] flexible port
 - [ ] remove db name hardcoding
-- [ ] seperete service and repo implementation file
+- [x] seperete service and repo implementation file

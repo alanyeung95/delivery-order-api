@@ -1,3 +1,5 @@
+// +build !integration
+
 package orders_test
 
 import (

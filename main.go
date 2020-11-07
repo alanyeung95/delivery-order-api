@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("mysql", "order_service:password@/orders")
+	db, err := sql.Open("mysql", "order_service:password@tcp(mysql.network:3306)/orders")
 	if err != nil {
 		panic(err)
 	}
@@ -37,7 +37,7 @@ func main() {
 		r.Mount("/orders", orders.NewHandler(orderSrv))
 	})
 
-	addr := fmt.Sprintf(":%d", 8081)
+	addr := fmt.Sprintf(":%d", 8080)
 	fmt.Println("Service is running on " + addr)
 	http.ListenAndServe(addr, r)
 

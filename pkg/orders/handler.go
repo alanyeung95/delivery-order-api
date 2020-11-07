@@ -10,6 +10,8 @@ import (
 	"github.com/alanyeung95/delivery-order-api/pkg/errors"
 	"github.com/go-chi/chi"
 	kithttp "github.com/go-kit/kit/transport/http"
+
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // NewHandler return handler that serves the order service
@@ -35,8 +37,10 @@ func (h *handlers) handlePlaceOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Origin[0] == "" || req.Origin[1] == "" || req.Destination[0] == "" || req.Destination[1] == "" {
-		kithttp.DefaultErrorEncoder(ctx, errors.NewBadRequestError(er.New("origin or destination cannot be empty")), w)
+	validate := validator.New()
+	err := validate.Struct(req)
+	if err != nil {
+		kithttp.DefaultErrorEncoder(ctx, errors.NewBadRequestError(err), w)
 		return
 	}
 

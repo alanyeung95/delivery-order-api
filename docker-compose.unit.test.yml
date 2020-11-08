@@ -9,11 +9,6 @@ services:
         - "8080:8080"        
     volumes:
       - .:/app
-    depends_on:
-        - "mysql"
-    environment:
-        - MYSQL_ADDRESSES=mysql.network:3306
-        - MYSQL_DATABASE=order
     command: sh -c 'apk add --no-cache git gcc g++ make && go test --tags=unit_tests -v ./...'
 networks:
   default:

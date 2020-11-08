@@ -1,16 +1,29 @@
 # delivery-order-api
 
+## Setup / Running Instructions
+### Google Map API Config
+Place your own custom key in `.env` file like
+
+```
+GOOGLE_MAP_API_KEY=AIzaSyDXJyfA6jxxxxxxxxxxxxxxxxxxxx
+```
+
+### Run the service
+```
+docker-compose up
+```
+
 ## Running test cases
 
 ### Unit test
 ```
-docker-compose -f docker-compose.unit.test.yml up
+make unit-test
 ```
 
 ### Integration test
 
 ```
-docker-compose -f docker-compose.yml -f docker-compose.integration.test.yml up  --abort-on-container-exit
+make integration-test
 ```
 
 ## Todo list
@@ -20,7 +33,7 @@ docker-compose -f docker-compose.yml -f docker-compose.integration.test.yml up  
 - [ ] swagger.yaml
 - [x] dockerize service
 - [x] integration test
-- [ ] readme instruction
+- [x] readme instruction
 
 ### Nice to have
 - [ ] flexible port

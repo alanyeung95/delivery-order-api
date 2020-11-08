@@ -1,0 +1,115 @@
+openapi: 3.0.0
+
+info:
+  title: API document for Delivery Order Backend
+  version: 1.0.0
+    
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /orders:  
+    post:
+      tags:
+        - "Order"
+      summary: Place order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlaceOrderRequestBody"          
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"  
+    get:
+      tags:
+        - "Order"
+      summary: List orders
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: true          
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Orders"
+  /orders/{id}:                
+    patch:
+      tags:
+        - "Order"
+      summary: Take order
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true           
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TakeOrderResponse"                  
+                
+components:
+  schemas:
+    PlaceOrderRequestBody:
+      type: object
+      properties:
+        origin:
+          type: array
+          items:
+            type: string
+          minItems: 2
+          maxItems: 2
+          description: START_LATITUDE and START_LONGITUDE
+          example: ["22.316397", "114.264144"]
+        destination:
+          type: array
+          items:
+            type: string
+          minItems: 2
+          maxItems: 2
+          description: END_LATITUDE and END_LONGITUDE
+          example: ["22.307588", "114.260881"]
+    Order:
+      type: object
+      properties:
+        id:
+          type: string    
+          example: "3d5d63f5-8d25-4109-ad3f-259527108dcd"
+        distance:
+          type: integer   
+          description: distance between origin and destination in meter
+          example: 1000
+        status:
+          type: string
+          enum: ["UNASSIGNED", "TAKEN"]
+          example: "UNASSIGNED"
+    TakeOrderResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["SUCCESS","TAKEN"]
+          example: "SUCCESS"
+    Orders:
+      type: array
+      items:
+        $ref: "#/components/schemas/Order"

@@ -38,9 +38,7 @@ func (s *service) PlaceOrder(ctx context.Context, distance int) (*Order, error) 
 		return nil, err
 	}
 
-	// TODO: db naming
 	order, err := s.repository.FindByID(ctx, id)
-	//err = s.repository.QueryRow("SELECT id, distance, status FROM delivery_order where id = ?", id).Scan(&order.ID, &order.Distance, &order.Status)
 	if err != nil {
 		return nil, err
 	}

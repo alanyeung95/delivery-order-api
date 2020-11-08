@@ -35,7 +35,5 @@ make integration-test
 - [x] integration test
 - [x] readme instruction
 
-### Nice to have
-- [ ] flexible port
-- [ ] remove db name hardcoding
-- [x] seperete service and repo implementation file
+### Improvement
+- [ ] Config object for validation

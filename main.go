@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/alanyeung95/delivery-order-api/pkg/mysql"
@@ -14,7 +15,8 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("mysql", "order_service:password@tcp(mysql.network:3306)/orders")
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_ADDRESSES"), os.Getenv("MYSQL_DATABASE")))
+
 	if err != nil {
 		panic(err)
 	}
@@ -37,7 +39,7 @@ func main() {
 		r.Mount("/orders", orders.NewHandler(orderSrv))
 	})
 
-	addr := fmt.Sprintf(":%d", 8080)
+	addr := fmt.Sprintf(":%s", os.Getenv("API_PORT"))
 	fmt.Println("Service is running on " + addr)
 	http.ListenAndServe(addr, r)
 

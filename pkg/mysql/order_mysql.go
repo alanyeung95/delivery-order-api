@@ -23,7 +23,6 @@ var _ orders.Repository = (*OrderRepository)(nil)
 
 func (r *OrderRepository) FindByID(ctx context.Context, id string) (*orders.Order, error) {
 	var order orders.Order
-	// TODO: db naming
 	err := r.repository.QueryRow("SELECT id, distance, status FROM delivery_order where id = ?", id).Scan(&order.ID, &order.Distance, &order.Status)
 	if err != nil {
 		return nil, err

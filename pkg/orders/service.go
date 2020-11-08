@@ -68,7 +68,7 @@ func (s *service) GetDistance(ctx context.Context, req PlaceOrderRequest) (int, 
 	}
 	defer resp.Body.Close()
 
-	res := Response{}
+	res := GoogleMapAPIResponse{}
 
 	err = json.NewDecoder(resp.Body).Decode(&res)
 	if err != nil {

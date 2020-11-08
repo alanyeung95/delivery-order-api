@@ -33,7 +33,7 @@ type Order struct {
 	Status   orderStatus `json:"status"    bson:"status"`
 }
 
-type Response struct {
+type GoogleMapAPIResponse struct {
 	Status     responseStatus `json:"status"`
 	StatusCode int            `json:"statusCode"`
 	Rows       []Row          `json:"rows"`

@@ -13,6 +13,11 @@ GOOGLE_MAP_API_KEY=AIzaSyDXJyfA6jxxxxxxxxxxxxxxxxxxxx
 make run
 ```
 
+You should able to see the message before start using/testing the service
+```
+app_1    | Service is running on :8080
+```
+
 ## Running test cases
 
 ### Unit test

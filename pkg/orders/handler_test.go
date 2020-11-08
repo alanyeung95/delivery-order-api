@@ -1,4 +1,4 @@
-// +build !integration
+// +build unit_tests
 
 package orders_test
 

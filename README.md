@@ -4,13 +4,13 @@
 
 ### Unit test
 ```
-go test -v ./...
+docker-compose -f docker-compose.unit.test.yml up
 ```
 
 ### Integration test
 
 ```
-go test --tags=integrationa -v ./...
+docker-compose -f docker-compose.yml -f docker-compose.integration.test.yml up  --abort-on-container-exit
 ```
 
 ## Todo list
@@ -18,7 +18,7 @@ go test --tags=integrationa -v ./...
 - [x] list order pagination 
 - [x] unit test
 - [ ] swagger.yaml
-- [ ] dockerize service
+- [x] dockerize service
 - [x] integration test
 - [ ] readme instruction
 

@@ -10,6 +10,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+// mockgen -destination=../mocks/mock_orders/mock_service.go -package=mock_orders github.com/alanyeung95/delivery-order-api/pkg/orders Service
+
 // Service interface
 type Service interface {
 	PlaceOrder(ctx context.Context, distance int) (*Order, error)

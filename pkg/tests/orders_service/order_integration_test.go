@@ -1,15 +1,17 @@
+// +build integration_tests
+
 package tests
 
 import (
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/alanyeung95/delivery-order-api/pkg/orders"
 	"github.com/gavv/httpexpect"
 )
 
-//var testurl string = os.Getenv("API_TEST_DOMAIN")
-var testurl string = "http://localhost:8081"
+var testurl string = os.Getenv("API_TEST_DOMAIN")
 
 func TestRootAPI(t *testing.T) {
 	e := httpexpect.New(t, testurl)

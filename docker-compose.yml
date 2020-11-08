@@ -12,10 +12,11 @@ services:
       - .:/app
     depends_on:
         - "mysql"
+    env_file: .env
     environment:
         - MYSQL_ADDRESSES=mysql.network:3306
         - MYSQL_DATABASE=order
-    command: sh -c './scripts/init.sh && go run main.go'
+    command: sh -c './scripts/wait-for.sh mysql.network:3306 -t 300 && go run main.go'
   mysql:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password

@@ -10,7 +10,7 @@ GOOGLE_MAP_API_KEY=AIzaSyDXJyfA6jxxxxxxxxxxxxxxxxxxxx
 
 ### Run the service
 ```
-docker-compose up
+make run
 ```
 
 ## Running test cases
